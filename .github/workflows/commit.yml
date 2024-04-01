@@ -1,0 +1,41 @@
+name: Commit quotidien aléatoire
+
+on:
+  schedule:
+    - cron:  '0 8-22 * * *'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+
+    - name: Install dependencies
+      run: npm install moment
+
+    - name: Vérifie si un commit doit être fait
+      run: |
+        # Définit si on doit faire un commit basé sur le jour de la semaine et une valeur aléatoire
+        IS_WEEKEND=$(date +%u)
+        MAX_COMMITS=$((1 + $RANDOM % 5))
+        COMMIT_TIMES=$(( $IS_WEEKEND < 6 ? $MAX_COMMITS : ($RANDOM % 2) ))
+        for i in $(seq 1 $COMMIT_TIMES)
+        do
+          DATE=$(date +"%Y-%m-%d %H:%M:%S")
+          echo "Dernier commit le $DATE" > date.txt
+          git config --global user.email "baechle.yohan@gmail.com"
+          git config --global user.name "Yohan-Baechle"
+          git add .
+          git commit -m "Update: $(date +'%Y-%m-%d %H:%M:%S')"
+          git push
+          # Attente aléatoire entre les commits
+          sleep $(( $RANDOM % 3600 ))
+        done
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

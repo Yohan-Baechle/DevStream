@@ -2,7 +2,7 @@ name: Commit quotidien aléatoire
 
 on:
   schedule:
-    - cron:  '0 8-22 * * *'
+    - cron: '0 8-22 * * *' # Exécute ce workflow à chaque heure pile entre 8h et 22h UTC
 
 jobs:
   build:
@@ -11,30 +11,31 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     
-    - name: Setup Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: '14'
-
-    - name: Install dependencies
-      run: npm install moment
-
-    - name: Vérifie si un commit doit être fait
+    - name: Configurer Git
       run: |
-        # Définit si on doit faire un commit basé sur le jour de la semaine et une valeur aléatoire
+        git config --global user.email "baechle.yohan@gmail.com"
+        git config --global user.name "Yohan-Baechle"
+    
+    - name: Vérifie si un commit doit être fait et exécute les commits
+      run: |
+        # Détermine si c'est le weekend. Les jours de semaine sont < 6 (Lun=1, Dim=7)
         IS_WEEKEND=$(date +%u)
+        # Définit le nombre maximal de commits par jour
         MAX_COMMITS=$((1 + $RANDOM % 5))
+        # Détermine le nombre de commits à faire, moins de chances le weekend
         COMMIT_TIMES=$(( $IS_WEEKEND < 6 ? $MAX_COMMITS : ($RANDOM % 2) ))
+
+        # Exécute un nombre de fois aléatoire basé sur COMMIT_TIMES
         for i in $(seq 1 $COMMIT_TIMES)
         do
+          # Génère un fichier avec la date et l'heure actuelle comme contenu
           DATE=$(date +"%Y-%m-%d %H:%M:%S")
           echo "Dernier commit le $DATE" > date.txt
-          git config --global user.email "baechle.yohan@gmail.com"
-          git config --global user.name "Yohan-Baechle"
+          # Crée un commit avec un message incluant la date et l'heure actuelle
           git add .
-          git commit -m "Update: $(date +'%Y-%m-%d %H:%M:%S')"
+          git commit -m "Automated update: $(date +'%Y-%m-%d %H:%M:%S')"
           git push
-          # Attente aléatoire entre les commits
+          # Pause aléatoire entre les commits pour plus de naturalité, ajustez selon besoin
           sleep $(( $RANDOM % 3600 ))
         done
       env:

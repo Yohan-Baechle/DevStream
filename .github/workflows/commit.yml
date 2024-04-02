@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3 # Mise à jour à la dernière version recommandée
+    - uses: actions/checkout@v3 # Assurez-vous d'utiliser la dernière version
     
     - name: Configurer Git
       run: |
@@ -28,13 +28,18 @@ jobs:
         # Exécute un nombre de fois aléatoire basé sur COMMIT_TIMES
         for i in $(seq 1 $COMMIT_TIMES)
         do
+          # S'assure que le dépôt local est à jour avec le dépôt distant
+          git pull origin main --rebase
+
           # Génère un fichier avec la date et l'heure actuelle comme contenu
           DATE=$(date +"%Y-%m-%d %H:%M:%S")
           echo "Dernier commit le $DATE" > date.txt
           # Crée un commit avec un message incluant la date et l'heure actuelle
           git add .
           git commit -m "Automated update: $(date +'%Y-%m-%d %H:%M:%S')"
-          git push
+          # Push les changements
+          git push origin main
+          
           # Pause aléatoire entre les commits pour plus de naturalité, ajustez selon besoin
           sleep $(( $RANDOM % 3600 ))
         done

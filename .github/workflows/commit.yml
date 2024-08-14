@@ -1,8 +1,8 @@
 name: Commit quotidien aléatoire
 
 on:
-  schedule:
-    - cron: '0 8-22 * * *' # Exécute ce workflow à chaque heure pile entre 8h et 22h UTC
+ # schedule:
+  #   - cron: '0 8-22 * * *' # Exécute ce workflow à chaque heure pile entre 8h et 22h UTC
 
 jobs:
   build:

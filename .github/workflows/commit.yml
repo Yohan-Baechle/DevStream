@@ -1,29 +1,32 @@
-name: Commit quotidien aléatoire
+name: Commit avec heure aléatoire
 
 on:
- # schedule:
-  #   - cron: '0 8-22 * * *' # Exécute ce workflow à chaque heure pile entre 8h et 22h UTC
+  schedule:
+    - cron: '0 9 * * 1-5' # Exécute ce workflow chaque jour de la semaine à 9h UTC
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3 # Assurez-vous d'utiliser la dernière version
+    - uses: actions/checkout@v3
     
     - name: Configurer Git
       run: |
         git config --global user.email "baechle.yohan@gmail.com"
         git config --global user.name "Yohan-Baechle"
     
+    - name: Ajouter un délai aléatoire avant l'exécution
+      run: |
+        # Délai aléatoire entre 0 et 6 heures (21600 secondes)
+        DELAY=$(( RANDOM % 21600 ))
+        echo "Attente de $DELAY secondes avant de commencer le commit"
+        sleep $DELAY
+
     - name: Vérifie si un commit doit être fait et exécute les commits
       run: |
-        # Détermine si c'est le weekend. Les jours de semaine sont < 6 (Lun=1, Dim=7)
-        IS_WEEKEND=$(date +%u)
-        # Définit le nombre maximal de commits par jour
-        MAX_COMMITS=$((1 + $RANDOM % 5))
-        # Détermine le nombre de commits à faire, moins de chances le weekend
-        COMMIT_TIMES=$(( $IS_WEEKEND < 6 ? $MAX_COMMITS : ($RANDOM % 2) ))
+        # Détermine le nombre de commits à faire (entre 0 et 2)
+        COMMIT_TIMES=$(( $RANDOM % 3 ))
 
         # Exécute un nombre de fois aléatoire basé sur COMMIT_TIMES
         for i in $(seq 1 $COMMIT_TIMES)
@@ -41,7 +44,7 @@ jobs:
           git push origin main
           
           # Pause aléatoire entre les commits pour plus de naturalité, ajustez selon besoin
-          sleep $(( $RANDOM % 3600 ))
+          sleep $(( $RANDOM % 1800 )) # Pause entre 0 et 30 minutes
         done
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
